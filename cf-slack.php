@@ -58,9 +58,14 @@ function cf_send_slack_message($config, $form){
 	$payload = array(
 		"username"		=>	 Caldera_Forms::do_magic_tags( $config['username'] )
 	);
+	// icon
+	if( !empty( $config['file'] ) ){
+		$payload['icon_url'] =	$config['file'];
+	}
+	
 	// override channel if set
 	if( !empty( trim( $config['channel'] ) ) ){
-		$payload['channel'] = trim( $config['channel'] );
+		$payload['channel'] = Caldera_Forms::do_magic_tags( trim( $config['channel'] ) );
 	}
 	// attach if setup
 	if( !empty( $config['attach'] ) ){
