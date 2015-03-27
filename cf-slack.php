@@ -14,17 +14,6 @@
 
 // add filters
 add_filter('caldera_forms_get_form_processors', 'cf_slack_register_processor');
-// register add on for auto updates
-add_filter('caldera_forms_get_active_addons', 'cf_slack_addon_updates' );
-function cf_slack_addon_updates($addons){
-  $addons['cf_slack'] = array(
-  	'type'	=>	'selldock',
-  	'file'	=>	__FILE__,
-  	'slug'	=>	'cf-slack'
-  );
-  return $addons;
-}
-
 function cf_slack_register_processor($pr){
 	$pr['slack'] = array(
 		"name"              =>  __('Slack', 'cf-slack'),
