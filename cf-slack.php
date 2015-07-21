@@ -3,7 +3,7 @@
  * Plugin Name: Caldera Forms - Slack Integration
  * Plugin URI:  
  * Description: Send messages into Slack on form submission.
- * Version:     1.0.0
+ * Version:     1.1.0-beta1
  * Author:      David Cramer for Caldera WP LLC
  * Author URI:  
  * License:     GPL-2.0+
