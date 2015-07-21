@@ -11,13 +11,16 @@
  */
 
 
-
-// add filters
+/**
+ * Add the proccesors
+ *
+ * @since 1.0.0
+ */
 add_filter('caldera_forms_get_form_processors', 'cf_slack_register_processor');
 function cf_slack_register_processor($pr){
 	$pr['slack'] = array(
-		"name"              =>  __('Slack', 'cf-slack'),
-		"description"       =>  __("post a message to slack on submission", 'cf-slack'),
+		"name"              =>  __('Slack: Message', 'cf-slack'),
+		"description"       =>  __("Post a message to slack on submission", 'cf-slack'),
 		"author"            =>  'David Cramer',
 		"author_url"        =>  'https://Calderawp.com',
 		"icon"				=>	plugin_dir_url(__FILE__) . "icon.png",
@@ -25,9 +28,9 @@ function cf_slack_register_processor($pr){
 		"template"          =>  plugin_dir_path(__FILE__) . "config.php",
 	);
 
-
+	//@since 1.1.0
 	$pr['slack-invite'] = array(
-		"name"              =>  __('Slack Invite', 'cf-slack'),
+		"name"              =>  __('Slack: Invite', 'cf-slack'),
 		"description"       =>  __("Send a Slack Invite", 'cf-slack'),
 		"author"            =>  'Josh Pollock',
 		"author_url"        =>  'https://Calderawp.com',
@@ -39,6 +42,14 @@ function cf_slack_register_processor($pr){
 	return $pr;
 }
 
+/**
+ * Send a message to Slack
+ *
+ * @since 1.0.0
+ *
+ * @param array $config Processor config
+ * @param array $form Form config
+ */
 function cf_send_slack_message($config, $form){
 
 	// create fields
@@ -81,12 +92,40 @@ function cf_send_slack_message($config, $form){
 		$payload['text'] = Caldera_Forms::do_magic_tags( $config['text'] );
 	}
 
+	/**
+	 * Filter request before sending message to Slack API
+	 *
+	 * Runs before encoding to JSON
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param array $payload Arguments for API request
+	 * @param array $config Processor config
+	 * @param array $form Form config
+	 */
+	add_filter( 'cf_slack_message_pre_request', $payload, $config, $form );
+
 	$args = array(
 		'body' => array(
 			'payload'	=>	json_encode($payload)
 		)
 	);
-	$raw_request = wp_remote_post( $config['url'], $args );
+
+	$response = wp_remote_post( $config['url'], $args );
+	/**
+	 * Get response from Slack API message request.
+	 *
+	 * Runs after request is sent, but before form processor ends
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param WP_Error|array $response The response or WP_Error on failure.
+	 * @param array $payload Arguments for API request
+	 * @param array $config Processor config
+	 * @param array $form Form config
+	 */
+	do_action( 'cf_slack_invite_request_sent', $response, $payload, $config, $form );
+
 }
 
 /**
@@ -161,13 +200,14 @@ function cf_slack_send_invite( $config, $form ) {
 	$response = wp_remote_post( $url );
 
 	/**
-	 * Get repsonse from Slack API invite request.
+	 * Get response from Slack API invite request.
 	 *
 	 * Runs after request is sent, but before form processor ends
 	 *
 	 * @since 1.1.0
 	 *
 	 * @param WP_Error|array $response The response or WP_Error on failure.
+	 * @param array $request_args Arguments for API request
 	 * @param array $config Processor config
 	 * @param array $form Form config
 	 */
